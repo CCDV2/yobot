@@ -363,7 +363,7 @@ class ClanBattle:
                 roles_id = get_role_id(roles)
             except ValueError as e:
                 raise InputError(e.args[0])
-            roles_name = get_role_id(roles_id)
+            roles_name = get_name_from_id(roles_id)
             roles_msg = '\n出刀角色：' + ','.join(roles_name)
         else:
             roles_id = [None] * 5
