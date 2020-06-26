@@ -40,7 +40,7 @@
         data: {
             tableData: [],
             bosses: [],
-            role_names: new Set(),
+            role_names: [],
             name2id: {},
         },
         methods: {
@@ -83,7 +83,7 @@
                     t.roles = []
                     for (role of i.roles) {
                         t.roles.push(role[1])
-                        _this.role_names.add(role[1])
+                        _this.role_names.push({text: role[1], value: role[1]})
                         _this.name2id[role[1]] = role[0]
                     }
                     _this.tableData.push(t)
@@ -96,6 +96,7 @@
                     })
                     t += 1
                 }
+
             }))
 
         },
