@@ -1060,7 +1060,7 @@ class ClanBattle:
         ):
             roles_id = [c.role1, c.role2, c.role3, c.role4, c.role5]
             roles_name = get_name_from_id(roles_id)
-            roles = [(int(_id), name) for _id, name in zip(roles_id, roles_name)]
+            roles = [(int(_id), name) for _id, name in zip(roles_id, roles_name) if _id is not None]
             report.append({
                 'battle_id': c.bid,
                 'qqid': c.qqid,
