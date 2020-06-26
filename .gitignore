@@ -1,6 +1,7 @@
 venv
 *.py[cdo]
 .vscode/
+.vs/
 src/client/*.bat
 src/client/*.sh
 src/client/*/
