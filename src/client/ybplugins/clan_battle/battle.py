@@ -431,7 +431,7 @@ class ClanBattle:
             role2=roles_id[1],
             role3=roles_id[2],
             role4=roles_id[3],
-            role5=roles_id[5]
+            role5=roles_id[4]
         )
         if defeat:
             if group.boss_num == 5:
