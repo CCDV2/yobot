@@ -41,6 +41,7 @@
             tableData: [],
             bosses: [],
             role_names: [],
+            role_names_set: new Set(),
             name2id: {},
         },
         methods: {
@@ -55,6 +56,8 @@
             },
             handleRoles: function (value, row, column) {
                 const property = column['property']
+                console.log(value)
+                console.log(row[property])
                 return row[property].indexOf(value) >= 0
             }
         },
@@ -83,7 +86,7 @@
                     t.roles = []
                     for (role of i.roles) {
                         t.roles.push(role[1])
-                        _this.role_names.push({text: role[1], value: role[1]})
+                        _this.role_names_set.add(role[1])
                         _this.name2id[role[1]] = role[0]
                     }
                     _this.tableData.push(t)
@@ -95,6 +98,13 @@
                         value: t
                     })
                     t += 1
+                }
+                _this.role_names = []
+                for (s of _this.role_names_set) {
+                    _this.role_names.push({
+                        text: s,
+                        value: s
+                    })
                 }
 
             }))
