@@ -4,7 +4,7 @@ import os
 import random
 import time
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin
 
 import aiohttp
@@ -99,7 +99,7 @@ class Consult:
             raise ValueError("防守人数过少")
         return def_lst
     
-    def get_cnname_from_id(self, ids: Optional[int, List[int]]) -> List[str]:
+    def get_cnname_from_id(self, ids: Union[int, List[int]]) -> List[str]:
         if type(ids) is int:
             ids = [ids]
         ret = []
