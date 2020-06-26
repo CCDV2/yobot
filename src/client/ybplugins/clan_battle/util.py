@@ -6,6 +6,7 @@ from typing import Tuple, Union
 from expiringdict import ExpiringDict
 
 from .typing import Pcr_date, Pcr_time
+from ..hook import Hook
 
 pcr_time_offset = {
     "jp": 4,
@@ -57,3 +58,7 @@ def timed_cached_func(max_len, max_age_seconds, ignore_self=False):
             return value
         return wrapper
     return decorator
+
+def get_role_id(s: str):
+    ret = Hook.get('user2roleid')(s)
+    return ret

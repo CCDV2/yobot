@@ -21,7 +21,7 @@ from .exception import (
     ClanBattleError, GroupError, GroupNotExist, InputError, UserError,
     UserNotInGroup)
 from .typing import BossStatus, ClanBattleReport, Groupid, Pcr_date, QQid
-from .util import atqq, pcr_datetime, pcr_timestamp, timed_cached_func
+from .util import atqq, pcr_datetime, pcr_timestamp, timed_cached_func, get_role_id
 
 _logger = logging.getLogger(__name__)
 
@@ -338,6 +338,7 @@ class ClanBattle:
                   *,
                   extra_msg: Optional[str] = None,
                   previous_day=False,
+                  roles: Optional[str] = None
                   ) -> BossStatus:
         """
         record a non-defeat challenge to boss
@@ -357,6 +358,11 @@ class ClanBattle:
             raise GroupNotExist
         if (not defeat) and (damage >= group.boss_health):
             raise InputError('伤害超出剩余血量，如击败请使用尾刀')
+        if roles:
+            roles_id = get_role_id(roles)
+            _logger.info(f'{type(roles_id)}: {roles_id}')
+        else:
+            roles_id = [None] * 5
         behalf = None
         if behalfed is not None:
             behalf = qqid
@@ -1200,6 +1206,8 @@ class ClanBattle:
                 return str(e)
             return boss_summary
         elif match_num == 4:  # 报刀
+            cmd = cmd.split('\n')
+            cmd, roles = cmd[0], cmd[1] if len(cmd) == 2 and cmd[1] != '' else None
             match = re.match(
                 r'^报刀 ?(\d+)([Ww万Kk千])? *(?:\[CQ:at,qq=(\d+)\])? *(昨[日天])? *(?:[\:：](.*))?$', cmd)
             if not match:
@@ -1228,13 +1236,15 @@ class ClanBattle:
                     damage,
                     behalf,
                     extra_msg=extra_msg,
-                    previous_day=previous_day)
+                    previous_day=previous_day,
+                    roles=roles)
             except ClanBattleError as e:
                 _logger.info('群聊 失败 {} {} {}'.format(user_id, group_id, cmd))
                 return str(e)
             _logger.info('群聊 成功 {} {} {}'.format(user_id, group_id, cmd))
             return str(boss_status)
         elif match_num == 5:  # 尾刀
+            
             match = re.match(
                 r'^尾刀 ?(?:\[CQ:at,qq=(\d+)\])? *(昨[日天])? *(?:[\:：](.*))?$', cmd)
             if not match:

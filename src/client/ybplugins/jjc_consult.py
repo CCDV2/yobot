@@ -12,6 +12,7 @@ import aiohttp
 from .templating import render_template
 from .yobot_exceptions import ServerError
 
+from .hook import Hook
 
 @dataclass
 class Chara:
@@ -49,6 +50,7 @@ class Consult:
                     row = line.split(",")
                     for col in row:
                         self.nickname_dict[col] = (row[0], row[1])
+        Hook.hook('user2roleid', self.user_input)
 
     async def update_nicknames(self):
         nickfile = os.path.join(self.setting["dirname"], "nickname3.csv")
