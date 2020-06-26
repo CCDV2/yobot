@@ -1206,7 +1206,7 @@ class ClanBattle:
                 return str(e)
             return boss_summary
         elif match_num == 4:  # 报刀
-            cmd = cmd.split('\n')
+            cmd = cmd.split('。')
             cmd, roles = cmd[0], cmd[1] if len(cmd) == 2 and cmd[1] != '' else None
             match = re.match(
                 r'^报刀 ?(\d+)([Ww万Kk千])? *(?:\[CQ:at,qq=(\d+)\])? *(昨[日天])? *(?:[\:：](.*))?$', cmd)
