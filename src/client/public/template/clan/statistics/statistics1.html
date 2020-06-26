@@ -28,7 +28,8 @@
             <el-table-column prop="status" label="状态" width="200" :filter-method="handleFilter"
                 :filters="[{ text: '普通', value: '普通' }, { text: '尾刀', value: '尾刀' },{ text: '剩余刀', value: '剩余刀' },{ text: '余尾刀', value: '余尾刀' }]"
                 sortable></el-table-column>
-
+            <el-table-column prop="roles" label="角色" width="200" :filter-method="handleRoles" :filters="role_names">
+            </el-table-column>
         </el-table>
     </div>
 </body>
@@ -38,7 +39,9 @@
         el: '#app',
         data: {
             tableData: [],
-            bosses: []
+            bosses: [],
+            role_names: new Set(),
+            name2id: {},
         },
         methods: {
             ts2ds: function (timestamp) {
@@ -49,6 +52,10 @@
             handleFilter: function (value, row, column) {
                 const property = column['property'];
                 return row[property] === value;
+            },
+            handleRoles: function (value, row, column) {
+                const property = column['property']
+                return row[property].indexOf(value) >= 0
             }
         },
         mounted: function () {
@@ -72,7 +79,12 @@
                     t.nickname = qqidMap[i.qqid]
                     t.boss = i.boss_num
                     t.damage = i.damage
-                    t.status = DMG_TYPE[(i.health_ramain === 0)*2+(i.is_continue)]
+                    t.status = DMG_TYPE[(i.health_ramain === 0) * 2 + (i.is_continue)]
+                    t.roles = []
+                    for (role of i.roles) {
+                        t.roles.push(role[0])
+                        role_names.add(role[1])
+                    }
                     _this.tableData.push(t)
                 }
                 t = 1

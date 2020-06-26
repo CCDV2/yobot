@@ -1058,6 +1058,9 @@ class ClanBattle:
         for c in Clan_challenge.select().where(
             *expressions
         ):
+            roles_id = [c.role1, c.role2, c.role3, c.role4, c.role5]
+            roles_name = get_name_from_id(roles_id)
+            roles = [(int(_id), name) for _id, name in zip(roles_id, roles_name)]
             report.append({
                 'battle_id': c.bid,
                 'qqid': c.qqid,
@@ -1075,6 +1078,7 @@ class ClanBattle:
                 'is_continue': c.is_continue,
                 'message': c.message,
                 'behalf': c.behalf,
+                'roles': roles
             })
         return report
 
@@ -1255,7 +1259,8 @@ class ClanBattle:
             _logger.info('群聊 成功 {} {} {}'.format(user_id, group_id, cmd))
             return str(boss_status)
         elif match_num == 5:  # 尾刀
-            
+            cmd = cmd.split('。')
+            cmd, roles = cmd[0], cmd[1] if len(cmd) == 2 and cmd[1] != '' else None 
             match = re.match(
                 r'^尾刀 ?(?:\[CQ:at,qq=(\d+)\])? *(昨[日天])? *(?:[\:：](.*))?$', cmd)
             if not match:

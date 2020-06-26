@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict, List, NewType, Optional
+from typing import Any, Dict, List, NewType, Optional, Tuple
 
 Pcr_date = NewType('Pcr_date', int)
 Pcr_time = NewType('Pcr_time', int)
@@ -38,6 +38,7 @@ class BossChallenge:
     is_continue: bool
     team: Optional[List[int]]
     message: Optional[str]
+    roles: List[Optional[Tuple[int, str]]]
 
 
 ClanBattleReport = NewType(
