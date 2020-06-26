@@ -1,7 +1,7 @@
 import datetime
 import time
 from functools import lru_cache
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 
 from expiringdict import ExpiringDict
 
@@ -59,7 +59,7 @@ def timed_cached_func(max_len, max_age_seconds, ignore_self=False):
         return wrapper
     return decorator
 
-def get_role_id(s: str):
+def get_role_id(s: str) -> List[int]:
     ret = Hook.get('user2roleid')(s)
-    ret = [_id for _id, jp in ret]
+    ret = [int(_id) for _id, jp in ret]
     return ret

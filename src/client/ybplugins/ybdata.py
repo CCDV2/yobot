@@ -97,6 +97,11 @@ class Clan_challenge(_BaseModel):
     is_continue = BooleanField()  # 此刀是结余刀
     message = TextField(null=True)
     behalf = IntegerField(null=True)
+    role1 = IntegerField(null=True)
+    role2 = IntegerField(null=True)
+    role3 = IntegerField(null=True)
+    role4 = IntegerField(null=True)
+    role5 = IntegerField(null=True)
 
     class Meta:
         indexes = ((('bid', 'gid'), False),)

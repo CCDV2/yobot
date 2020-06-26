@@ -363,7 +363,6 @@ class ClanBattle:
                 roles_id = get_role_id(roles)
             except ValueError as e:
                 raise InputError(e.args[0])
-            _logger.info(f'{type(roles_id)}: {roles_id}')
         else:
             roles_id = [None] * 5
         behalf = None
@@ -428,6 +427,11 @@ class ClanBattle:
             is_continue=is_continue,
             message=extra_msg,
             behalf=behalf,
+            role1=roles_id[0],
+            role2=roles_id[1],
+            role3=roles_id[2],
+            role4=roles_id[3],
+            role5=roles_id[5]
         )
         if defeat:
             if group.boss_num == 5:
