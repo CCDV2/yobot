@@ -82,8 +82,9 @@
                     t.status = DMG_TYPE[(i.health_ramain === 0) * 2 + (i.is_continue)]
                     t.roles = []
                     for (role of i.roles) {
-                        t.roles.push(role[0])
-                        role_names.add(role[1])
+                        t.roles.push(role[1])
+                        _this.role_names.add(role[1])
+                        _this.name2id[role[1]] = role[0]
                     }
                     _this.tableData.push(t)
                 }
