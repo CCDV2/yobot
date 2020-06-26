@@ -21,7 +21,7 @@ from .exception import (
     ClanBattleError, GroupError, GroupNotExist, InputError, UserError,
     UserNotInGroup)
 from .typing import BossStatus, ClanBattleReport, Groupid, Pcr_date, QQid
-from .util import atqq, pcr_datetime, pcr_timestamp, timed_cached_func, get_role_id
+from .util import atqq, pcr_datetime, pcr_timestamp, timed_cached_func, get_role_id, get_name_from_id
 
 _logger = logging.getLogger(__name__)
 
@@ -363,8 +363,11 @@ class ClanBattle:
                 roles_id = get_role_id(roles)
             except ValueError as e:
                 raise InputError(e.args[0])
+            roles_name = get_role_id(roles_id)
+            roles_msg = '\n出刀角色：' + ','.join(roles_name)
         else:
             roles_id = [None] * 5
+            roles_msg = ''
         behalf = None
         if behalfed is not None:
             behalf = qqid
@@ -469,6 +472,7 @@ class ClanBattle:
             msg = '{}对boss造成了{:,}点伤害\n（今日第{}刀，{}）'.format(
                 nik, damage, finished+1, '剩余刀' if is_continue else '完整刀'
             )
+        msg += roles_msg
         status = BossStatus(
             group.boss_cycle,
             group.boss_num,

@@ -65,3 +65,7 @@ def get_role_id(s: str) -> List[int]:
     if len(ret) < 5: 
         ret = ret.extend([None] * (5 - len(ret)))
     return ret
+
+def get_name_from_id(ids: Optional[int, List[int]]) -> List[int]:
+    ret = Hook.get('roleid2cnname')(ids)
+    return ret

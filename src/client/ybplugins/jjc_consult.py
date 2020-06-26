@@ -39,6 +39,7 @@ class Consult:
     def __init__(self, glo_setting: dict, *args, **kwargs):
         self.setting = glo_setting
         self.nickname_dict: Dict[str, Tuple[str, str]] = {}
+        self.id2cnname: Dict[int, str] = {}
         nickfile = os.path.join(glo_setting["dirname"], "nickname3.csv")
         if not os.path.exists(nickfile):
             asyncio.ensure_future(self.update_nicknames(),
@@ -48,9 +49,11 @@ class Consult:
                 csv = f.read()
                 for line in csv.split("\n")[1:]:
                     row = line.split(",")
+                    self.id2cnname[int(row[0])] = row[2]
                     for col in row:
                         self.nickname_dict[col] = (row[0], row[1])
         Hook.hook('user2roleid', self.user_input)
+        Hook.hook('roleid2cnname', self.get_cnname_from_id)
 
     async def update_nicknames(self):
         nickfile = os.path.join(self.setting["dirname"], "nickname3.csv")
@@ -68,6 +71,7 @@ class Consult:
             csv = f.read()
             for line in csv.split("\n")[1:]:
                 row = line.split(",")
+                self.id2cnname[int(row[0])] = row[2]
                 for col in row:
                     self.nickname_dict[col] = (row[0], row[1])
 
@@ -94,6 +98,15 @@ class Consult:
         if len(def_lst) < 3:
             raise ValueError("防守人数过少")
         return def_lst
+    
+    def get_cnname_from_id(self, ids: Optional[int, List[int]]) -> List[str]:
+        if type(ids) is int:
+            ids = [ids]
+        ret = []
+        for _id in ids:
+            name = self.id2cnname.get(_id, '未知')
+            ret.append(name)
+        return ret
 
     async def jjcsearch_async(self, def_lst, region):
         search_source = self.setting["jjc_search"]
