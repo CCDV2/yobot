@@ -359,7 +359,10 @@ class ClanBattle:
         if (not defeat) and (damage >= group.boss_health):
             raise InputError('伤害超出剩余血量，如击败请使用尾刀')
         if roles:
-            roles_id = get_role_id(roles)
+            try:
+                roles_id = get_role_id(roles)
+            except ValueError as e:
+                raise InputError(e.args[0])
             _logger.info(f'{type(roles_id)}: {roles_id}')
         else:
             roles_id = [None] * 5

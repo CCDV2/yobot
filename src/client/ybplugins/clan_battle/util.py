@@ -61,4 +61,5 @@ def timed_cached_func(max_len, max_age_seconds, ignore_self=False):
 
 def get_role_id(s: str):
     ret = Hook.get('user2roleid')(s)
+    ret = [_id for _id, jp in ret]
     return ret
