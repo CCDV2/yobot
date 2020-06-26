@@ -1,7 +1,7 @@
 import datetime
 import time
 from functools import lru_cache
-from typing import Tuple, Union, List
+from typing import Tuple, Union, List, Optional
 
 from expiringdict import ExpiringDict
 
