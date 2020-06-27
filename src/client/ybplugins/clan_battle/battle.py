@@ -363,7 +363,7 @@ class ClanBattle:
             raise InputError('伤害超出剩余血量，如击败请使用尾刀')
         if roles:
             try:
-                roles_id = self.match_register_team(roles) or get_role_id(roles)
+                roles_id = self.match_register_team(roles, group_id) or get_role_id(roles)
             except ValueError as e:
                 raise InputError(str(e) + '\n若为队伍，请输入“查队”查询队伍')
             roles_name = get_name_from_id(roles_id)
@@ -1392,7 +1392,8 @@ class ClanBattle:
                     None,
                     behalf,
                     extra_msg=extra_msg,
-                    previous_day=previous_day)
+                    previous_day=previous_day,
+                    roles=roles)
             except ClanBattleError as e:
                 _logger.info('群聊 失败 {} {} {}'.format(user_id, group_id, cmd))
                 return str(e)
