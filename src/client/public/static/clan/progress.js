@@ -16,6 +16,11 @@ var vm = new Vue({
         send_via_private: false,
         dropMemberVisible: false,
         today: 0,
+        roles_set: new Set(),
+        roles_list: [],
+        roles_list_visible: false,
+        roles_checked: [],
+        roles_include: false,
     },
     mounted() {
         var thisvue = this;
@@ -29,92 +34,118 @@ var vm = new Vue({
                 action: 'get_member_list',
                 csrf_token: csrf_token,
             }),
-        ]).then(axios.spread(function (res, memres) {
+        ]).then(axios.spread(function(res, memres) {
             if (res.data.code != 0) {
                 thisvue.$alert(res.data.message, '获取记录失败');
                 return;
             }
             if (memres.data.code != 0) {
-                thisvue.$alert(memres.data.message, '获取成员失败');
+                thisvue.$alert(memres.data.message,
+                    '获取成员失败');
                 return;
             }
             thisvue.members = memres.data.members;
             for (m of thisvue.members) {
                 m.finished = 0;
                 m.detail = [];
+                m.roles_used = new Set();
             }
             thisvue.today = res.data.today;
             thisvue.reportDate = thisvue.get_today();
             thisvue.refresh(res.data.challenges);
-        })).catch(function (error) {
+        })).catch(function(error) {
             thisvue.$alert(error, '获取数据失败');
         });
     },
     methods: {
-        get_today: function () {
+        get_today: function() {
             let d = new Date();
             d -= 18000000;
             d = new Date(d).setHours(0, 0, 0, 0);
             return d;
         },
-        csummary: function (cha) {
+        csummary: function(cha) {
             if (cha == undefined) {
                 return '';
             }
-            return `(${cha.cycle}-${cha.boss_num}) <a class="digit${cha.damage.toString().length}">${cha.damage}</a>`;
+            roles_name = []
+            for (r of cha.roles) {
+                roles_name.push(r[1]);
+            }
+            names = roles_name.join('，');
+            return `(${cha.cycle}-${cha.boss_num}) <a class="digit${cha.damage.toString().length}">${cha.damage}</a><br>${names}`;
         },
-        cdetail: function (cha) {
+        cdetail: function(cha) {
             if (cha == undefined) {
                 return '';
             }
             var nd = new Date();
             nd.setTime(cha.challenge_time * 1000);
-            var detailstr = nd.toLocaleString('chinese', { hour12: false, timeZone: 'asia/shanghai' }) + '\n';
-            detailstr += cha.cycle + '周目' + cha.boss_num + '号boss\n';
-            detailstr += (cha.health_ramain + cha.damage).toLocaleString(options = { timeZone: 'asia/shanghai' }) + '→' + cha.health_ramain.toLocaleString(options = { timeZone: 'asia/shanghai' });
+            var detailstr = nd.toLocaleString('chinese', {
+                hour12: false,
+                timeZone: 'asia/shanghai'
+            }) + '\n';
+            detailstr += cha.cycle + '周目' + cha.boss_num +
+                '号boss\n';
+            detailstr += (cha.health_ramain + cha.damage).toLocaleString(
+                options = {
+                    timeZone: 'asia/shanghai'
+                }) + '→' + cha.health_ramain.toLocaleString(
+                options = {
+                    timeZone: 'asia/shanghai'
+                });
             if (cha.message) {
                 detailstr += '\n留言：' + cha.message;
             }
             return detailstr;
         },
-        arraySpanMethod: function ({ row, column, rowIndex, columnIndex }) {
+        arraySpanMethod: function({
+            row, column, rowIndex, columnIndex
+        }) {
             if (columnIndex >= 4) {
                 if (columnIndex % 2 == 0) {
                     var detail = row.detail[columnIndex - 4];
-                    if (detail != undefined && detail.health_ramain != 0) {
+                    if (detail != undefined && detail.health_ramain !=
+                        0) {
                         return [1, 2];
                     }
                 } else {
                     var detail = row.detail[columnIndex - 5];
-                    if (detail != undefined && detail.health_ramain != 0) {
+                    if (detail != undefined && detail.health_ramain !=
+                        0) {
                         return [0, 0];
                     }
                 }
             }
         },
-        report_day: function (event) {
+        report_day: function(event) {
             var thisvue = this;
             axios.post('../api/', {
                 action: 'get_challenge',
                 csrf_token: csrf_token,
-                ts: (thisvue.reportDate ? (thisvue.reportDate.getTime() / 1000) + 43200 : null),
-            }).then(function (res) {
+                ts: (thisvue.reportDate ? (thisvue.reportDate
+                        .getTime() / 1000) + 43200 :
+                    null),
+            }).then(function(res) {
                 if (res.data.code != 0) {
-                    thisvue.$alert(res.data.message, '获取记录失败');
+                    thisvue.$alert(res.data.message,
+                        '获取记录失败');
                 } else {
                     thisvue.refresh(res.data.challenges);
                 }
-            }).catch(function (error) {
+            }).catch(function(error) {
                 thisvue.$alert(error, '获取记录失败');
             })
             this.today = -1;
         },
-        refresh: function (challenges) {
+        refresh: function(challenges) {
             challenges.sort((a, b) => a.qqid - b.qqid);
             this.progressData = [...this.members];
             // for (m of this.progressData) m.today_total_damage = 0;
             var thisvue = this;
-            var m = { qqid: -1 };
+            var m = {
+                qqid: -1
+            };
             for (c of challenges) {
                 if (m.qqid != c.qqid) {
                     thisvue.update_member_info(m);
@@ -122,6 +153,7 @@ var vm = new Vue({
                         qqid: c.qqid,
                         finished: 0,
                         detail: [],
+                        roles_used: new Set(),
                         // today_total_damage: 0,
                     }
                 }
@@ -136,10 +168,14 @@ var vm = new Vue({
                         m.finished += 0.5;
                     }
                 }
+                for (role of c.roles) {
+                    thisvue.roles_set.add(role[1]);
+                    m.roles_used.add(role[1]);
+                }
             }
             thisvue.update_member_info(m);
         },
-        viewTails: function () {
+        viewTails: function() {
             this.tailsData = [];
             for (const m of this.progressData) {
                 if (m.finished % 1 != 0) {
@@ -155,7 +191,11 @@ var vm = new Vue({
             }
             this.tailsDataVisible = true;
         },
-        update_member_info: function (m) {
+        viewRoles: function() {
+            this.roles_list = Array.from(this.roles_set);
+            this.roles_list_visible = true;
+        },
+        update_member_info: function(m) {
             if (m.qqid == -1) {
                 return
             }
@@ -163,6 +203,7 @@ var vm = new Vue({
                 if (m.qqid == this.progressData[index].qqid) {
                     m.nickname = this.progressData[index].nickname;
                     m.sl = this.progressData[index].sl;
+                    m.roles_used = new Set([...m.roles_used, ...this.progressData[index].roles_used])
                     this.progressData[index] = m;
                     return
                 }
@@ -170,7 +211,7 @@ var vm = new Vue({
             m.nickname = '（未加入）';
             this.progressData.push(m);
         },
-        find_name: function (qqid) {
+        find_name: function(qqid) {
             for (m of this.members) {
                 if (m.qqid == qqid) {
                     return m.nickname;
@@ -178,15 +219,21 @@ var vm = new Vue({
             };
             return qqid;
         },
-        viewInExcel: function () {
+        viewInExcel: function() {
             var icons = document.getElementsByTagName('span');
             while (icons[0]) {
                 icons[0].remove();
             }
             var uri = 'data:application/vnd.ms-excel;base64,';
-            var ctx = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>' + document.getElementsByTagName('thead')[0].innerHTML + document.getElementsByTagName('tbody')[0].innerHTML + '</table></body></html>';
-            window.location.href = uri + window.btoa(unescape(encodeURIComponent(ctx)));
-            document.documentElement.innerHTML = "请在Excel中查看（如果无法打开，请安装最新版本Excel）\n或者将整个表格复制，粘贴到Excel中使用";
+            var ctx =
+                '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>' +
+                document.getElementsByTagName('thead')[0].innerHTML +
+                document.getElementsByTagName('tbody')[0].innerHTML +
+                '</table></body></html>';
+            window.location.href = uri + window.btoa(unescape(
+                encodeURIComponent(ctx)));
+            document.documentElement.innerHTML =
+                "请在Excel中查看（如果无法打开，请安装最新版本Excel）\n或者将整个表格复制，粘贴到Excel中使用";
         },
         handleTitleSelect(key, keyPath) {
             switch (key) {
@@ -213,11 +260,27 @@ var vm = new Vue({
         selectUnfinished(event) {
             this.progressData.forEach(row => {
                 if (row.finished < 3) {
-                    this.$refs.multipleTable.toggleRowSelection(row, true);
+                    this.$refs.multipleTable.toggleRowSelection(
+                        row, true);
                 } else {
-                    this.$refs.multipleTable.toggleRowSelection(row, false);
+                    this.$refs.multipleTable.toggleRowSelection(
+                        row, false);
                 }
             });
+        },
+        selectRoles(event) {
+            this.progressData.forEach(row => {
+                const intersect = this.roles_checked.filter(x => {return row.roles_used.has(x)})
+                if (this.roles_include) {
+                    this.$refs.multipleTable.toggleRowSelection(
+                        row, intersect.length === this.roles_checked.length);
+                } else {
+                    this.$refs.multipleTable.toggleRowSelection(
+                        row, intersect.length === 0);
+                }
+
+            });
+            this.roles_list_visible = false;
         },
         sendRequest(action) {
             if (this.multipleSelection.length === 0) {
@@ -236,7 +299,7 @@ var vm = new Vue({
             if (action === 'send_remind') {
                 payload.send_private_msg = thisvue.send_via_private;
             }
-            axios.post('../api/', payload).then(function (res) {
+            axios.post('../api/', payload).then(function(res) {
                 if (res.data.code != 0) {
                     if (res.data.code == 11) {
                         res.data.message = '你的权限不足';
@@ -248,7 +311,7 @@ var vm = new Vue({
                         message: res.data.notice,
                     });
                 }
-            }).catch(function (error) {
+            }).catch(function(error) {
                 thisvue.$alert(error, '请求失败');
             })
         },
