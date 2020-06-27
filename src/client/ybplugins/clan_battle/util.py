@@ -62,8 +62,8 @@ def timed_cached_func(max_len, max_age_seconds, ignore_self=False):
 def get_role_id(s: str) -> List[Optional[int]]:
     ret = Hook.get('user2roleid')(s, len_check=False)
     ret = [int(_id) for _id, jp in ret]
-    if len(ret) < 5: 
-        ret = ret.extend([None] * (5 - len(ret)))
+    if len(ret) < 5:
+        ret.extend([None] * (5 - len(ret)))
     return ret
 
 def get_name_from_id(ids: Union[int, List[int]]) -> List[int]:

@@ -82,6 +82,7 @@ class Consult:
             raise ValueError("请将5个名称以空格分隔")
         if len(in_list) > 5:
             raise ValueError("防守人数过多")
+        def_lst = []
         for index in in_list:
             item = self.nickname_dict.get(index.lower(), None)
             if item is None:
@@ -98,7 +99,7 @@ class Consult:
         if len_check and len(def_lst) < 3:
             raise ValueError("防守人数过少")
         return def_lst
-    
+
     def get_cnname_from_id(self, ids: Union[int, List[int]]) -> List[str]:
         if type(ids) is int:
             ids = [ids]
