@@ -15,7 +15,7 @@ from quart import (Quart, jsonify, make_response, redirect, request, session,
 
 from ..templating import render_template
 from ..web_util import async_cached_func
-from ..ybdata import (Clan_challenge, Clan_group, Clan_member, Clan_subscribe,
+from ..ybdata import (Clan_challenge, Clan_group, Clan_member, Clan_subscribe, Clan_team
                       User)
 from .exception import (
     ClanBattleError, GroupError, GroupNotExist, InputError, UserError,
@@ -60,6 +60,9 @@ class ClanBattle:
         '查3': 23,
         '查4': 24,
         '查5': 25,
+        '登记队伍': 26,
+        '查询队伍': 27,
+        '删除队伍': 28,
     }
 
     Server = {
@@ -1128,6 +1131,76 @@ class ClanBattle:
             })
         return member_list
 
+    def register_team(self, cmd: str, group_id: Groupid, qqid: QQid) -> str:
+        if ':' in cmd:
+            cmd, message = cmd.split(':')
+        else:
+            message = None
+        cmds = cmd.split()
+        reg_prefix, team_name, team_member_names = cmds[0], cmds[1], cmds[2:]
+        team_meber_names = ' '.join(team_meber_names)
+        team_member_ids = get_role_id(team_member_names)
+        pre_team = Clan_team.select(gid=group_id, team_name=team_name)
+        if pre_team:
+            pre_team = pre_team[0]
+            pre_message = f'原阵容：\n{team_name} ' + \
+                '，'.join(get_name_from_id([getattr(pre_team, f'role{x}', None) for x in range(1, 6)])) +\
+               f' {pre_team.message}'
+            Clan_team.update(
+                role1=team_member_ids[0],
+                role2=team_member_ids[1],
+                role3=team_member_ids[2],
+                role4=team_member_ids[3],
+                role5=team_member_ids[4],
+                message=message
+            ).where(
+                Clan_team.gid==group_id,
+                Clan_team.team_name==team_name,
+            ).execute()
+        else:
+            pre_message = ''
+            Clan_team.create(
+                gid=group_id,
+                team_name=team_name,
+                role1=team_member_ids[0],
+                role2=team_member_ids[1],
+                role3=team_member_ids[2],
+                role4=team_member_ids[3],
+                role5=team_member_ids[4],
+                message=message
+            )
+        now_message = '现阵容：\n{team_name} ' + '，'.join(get_name_from_id(team_member_ids)) + f' {message}'
+        return '\n'.join(['登记队伍成功', pre_message, now_message])
+
+    def get_register_team(self, cmd, group_id: Groupid) -> List[str]:
+        ret = []
+        for c in Clan_team.select(
+            Clan_team.team_name,
+            Clan_team.role1,
+            Clan_team.role2,
+            Clan_team.role3,
+            Clan_team.role4,
+            Clan_team.role5,
+            Clan_team.message
+        ).where(
+            Clan_team.gid==group_id,
+        ):
+            role_names = '，'.join(get_name_from_id([getattr(c, f'role{x}', None) for x in range(1, 6)]))
+            ret.append(' '.join([c.team_name, role_names, c.message]))
+        return ret
+
+    def delete_register_team(self, cmd, group_id: Groupid, qqid: QQid) -> str:
+        prefix, team_name = cmd.split(' ')
+        ret = Clan_team.delete().where(
+            Clan_team.gid == group_id,
+            Clan_team.team_name == team_name,
+            ).excute()
+        return str(ret)
+
+
+    def match_register_team(self, team_name: str, group_id) -> Optional[List[int]]:
+        pass
+
     @timed_cached_func(max_len=16, max_age_seconds=3600, ignore_self=True)
     def get_member_list(self, group_id: Groupid) -> List[Dict[str, Any]]:
         """
@@ -1455,6 +1528,20 @@ class ClanBattle:
                 if m.get('message'):
                     reply += '：' + m['message']
             return reply
+        elif match_num == 26: # 登记队伍
+            try:
+                reply = self.register_team(cmd, group_id, user_id)
+                return reply
+            except ValueError as e:
+                return str(e)
+        elif match_num == 27: # 查询队伍
+            try:
+                ret = self.get_register_team(cmd, group_id)
+                return '\n'.join(ret)
+            except ValueError as e:
+                return str(e)
+        elif match_num == 28: # 查询队伍
+            return self.delete_register_team(cmd, group_id, user_id)
 
     def register_routes(self, app: Quart):
 

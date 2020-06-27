@@ -4,7 +4,7 @@ from playhouse.migrate import SqliteMigrator, migrate
 from .web_util import rand_string
 
 _db = SqliteDatabase(None)
-_version = 10  # 目前版本
+_version = 11  # 目前版本
 
 MAX_TRY_TIMES = 3
 
@@ -142,6 +142,17 @@ class User_box(_BaseModel):
     class Meta:
         primary_key = CompositeKey('qqid', 'chid')
 
+class Clan_team(_BaseModel):
+    gid = BigIntegerField()
+    team_name = TextField()
+    role1 = IntegerField(null=True)
+    role2 = IntegerField(null=True)
+    role3 = IntegerField(null=True)
+    role4 = IntegerField(null=True)
+    role5 = IntegerField(null=True)
+    message = TextField(null=True)
+    class Meta:
+        primary_key = CompositeKey('gid', 'team_name')
 
 class DB_schema(_BaseModel):
     key = CharField(max_length=64, primary_key=True)
@@ -174,6 +185,7 @@ def init(sqlite_filename):
         Clan_subscribe.create_table()
         Character.create_table()
         User_box.create_table()
+        Clan_team.create_table()
         old_version = _version
     if old_version > _version:
         print('数据库版本高于程序版本，请升级yobot')
@@ -248,4 +260,6 @@ def db_upgrade(old_version):
             migrator.add_column('clan_challenge', 'role4', IntegerField(null=True)),    
             migrator.add_column('clan_challenge', 'role5', IntegerField(null=True)),    
         )
+    if old_version < 11:
+        Clan_team.create_table()
     DB_schema.replace(key='version', value=str(_version)).execute()

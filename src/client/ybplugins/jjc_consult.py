@@ -75,10 +75,10 @@ class Consult:
                 for col in row:
                     self.nickname_dict[col] = (row[0], row[1])
 
-    def user_input(self, cmd: str, is_retry=False):
+    def user_input(self, cmd: str, is_retry=False, len_check=True):
         def_set = set()
         in_list = cmd.split()
-        if len(in_list) == 1:
+        if len_check and len(in_list) == 1:
             raise ValueError("请将5个名称以空格分隔")
         if len(in_list) > 5:
             raise ValueError("防守人数过多")
@@ -95,7 +95,7 @@ class Consult:
                     return self.user_input(cmd, True)
             def_set.add(item)
             def_lst = list(def_set)
-        if len(def_lst) < 3:
+        if len_check and len(def_lst) < 3:
             raise ValueError("防守人数过少")
         return def_lst
     
@@ -104,7 +104,7 @@ class Consult:
             ids = [ids]
         ret = []
         for _id in ids:
-            name = self.id2cnname.get(_id, '未知')
+            name = self.id2cnname.get(_id, '')
             ret.append(name)
         return ret
 
