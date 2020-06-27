@@ -12,6 +12,7 @@ from aiocqhttp.api import Api
 from apscheduler.triggers.cron import CronTrigger
 from quart import (Quart, jsonify, make_response, redirect, request, session,
                    url_for)
+from prettytable import PrettyTable
 
 from ..templating import render_template
 from ..web_util import async_cached_func
@@ -1184,7 +1185,7 @@ class ClanBattle:
         now_message = f'现阵容：\n{team_name} ' + '，'.join(get_name_from_id(exist_team_member_ids)) + f' {message}'
         return '\n'.join(['登记队伍成功', pre_message, now_message])
 
-    def get_register_team(self, cmd, group_id: Groupid) -> List[str]:
+    def get_register_team(self, cmd, group_id: Groupid) -> List:
         ret = []
         for c in Clan_team.select(
             Clan_team.team_name,
@@ -1200,7 +1201,7 @@ class ClanBattle:
             roles_id = [getattr(c, f'role{x}', None) for x in range(1, 6)]
             exist_roles_id = [x for x in roles_id if x]
             role_names = '，'.join(get_name_from_id(exist_roles_id))
-            ret.append(' '.join([c.team_name, role_names, c.message]))
+            ret.append([c.team_name, role_names, c.message])
         return ret
 
     def delete_register_team(self, cmd, group_id: Groupid, qqid: QQid) -> str:
@@ -1577,7 +1578,12 @@ class ClanBattle:
         elif match_num == 27: # 查询队伍
             try:
                 ret = self.get_register_team(cmd, group_id)
-                return '\n'.join(ret)
+                tb = PrettyTable()
+                tb.field_names =  ['队伍名称', '角色', '备注']
+                tb.align = 'l'
+                for r in ret:
+                    tb.add_row(r)
+                return tb.get_string()
             except ValueError as e:
                 return str(e)
         elif match_num == 28: # 查询队伍
