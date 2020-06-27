@@ -363,9 +363,9 @@ class ClanBattle:
             raise InputError('伤害超出剩余血量，如击败请使用尾刀')
         if roles:
             try:
-                roles_id = get_role_id(roles)
+                roles_id = self.match_register_team(roles) or get_role_id(roles)
             except ValueError as e:
-                raise InputError(e.args[0])
+                raise InputError(str(e) + '\n若为队伍，请输入“查队”查询队伍')
             roles_name = get_name_from_id(roles_id)
             roles_msg = '\n出刀角色：' + ','.join(roles_name)
         else:
@@ -1208,21 +1208,37 @@ class ClanBattle:
         if len(cmds) == 1:
             raise InputError('请输入需要删除的队伍名称')
         prefix, team_name = cmds[0], cmds[1]
+        exps = [Clan_team.gid == group_id]
+        if team_name != '--all':
+            exps.append(Clan_team.team_name == team_name)
         result = Clan_team.delete().where(
-            Clan_team.gid == group_id,
-            Clan_team.team_name == team_name,
+            *exps
             ).execute()
         if result == 0:
             ret = '没有找到需要删除的队伍'
         elif result == 1:
             ret = '删除队伍成功'
         else:
-            ret = '未知删除错误，{}'.format(result)
+            ret = '删除队伍成功，共删除了{}条'.format(result)
         return ret
 
 
-    def match_register_team(self, team_name: str, group_id) -> Optional[List[int]]:
-        pass
+    def match_register_team(self, team_name: str, group_id) -> Optional[List[Optional[int]]]:
+        for c in Clan_team.select(
+            Clan_team.team_name,
+            Clan_team.role1,
+            Clan_team.role2,
+            Clan_team.role3,
+            Clan_team.role4,
+            Clan_team.role5,
+            Clan_team.message
+        ).where(
+            Clan_team.gid==group_id,
+        ):
+            if c.team_name == team_name:
+                roles_id = [getattr(c, f'role{x}', None) for x in range(1, 6)]
+                return roles_id
+        return None
 
     @timed_cached_func(max_len=16, max_age_seconds=3600, ignore_self=True)
     def get_member_list(self, group_id: Groupid) -> List[Dict[str, Any]]:
