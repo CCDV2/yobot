@@ -139,7 +139,11 @@ var vm = new Vue({
             this.today = -1;
         },
         refresh: function(challenges) {
-            this.roles_set.clear()
+            // 当日期改变时，已选角色清空
+            this.roles_set.clear();
+            this.roles_checked = [];
+            this.roles_include = false;
+            
             challenges.sort((a, b) => a.qqid - b.qqid);
             this.progressData = [...this.members];
             // for (m of this.progressData) m.today_total_damage = 0;
