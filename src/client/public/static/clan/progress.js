@@ -139,6 +139,7 @@ var vm = new Vue({
             this.today = -1;
         },
         refresh: function(challenges) {
+            this.roles_set.clear()
             challenges.sort((a, b) => a.qqid - b.qqid);
             this.progressData = [...this.members];
             // for (m of this.progressData) m.today_total_damage = 0;
