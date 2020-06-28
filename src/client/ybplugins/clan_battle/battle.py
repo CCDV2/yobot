@@ -1577,7 +1577,7 @@ class ClanBattle:
         elif match_num == 27: # 查询队伍
             try:
                 ret = self.get_register_team(cmd, group_id)
-                return '\n'.join(['　　'.join(r) for r in ret])
+                return '\n'.join(['　'.join(r) for r in ret])
             except ValueError as e:
                 return str(e)
         elif match_num == 28: # 查询队伍
