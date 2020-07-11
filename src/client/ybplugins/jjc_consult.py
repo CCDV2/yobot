@@ -40,6 +40,12 @@ class Consult:
         self.setting = glo_setting
         self.nickname_dict: Dict[str, Tuple[str, str]] = {}
         self.id2cnname: Dict[int, str] = {}
+        self.id2dis: Dict[int, int] = {}
+        with open(os.path.join(glo_setting["dirname"], 'stand.json'), 'r') as f:
+            d = json.load(f)
+        for k, v in d.items():
+            self.id2dis[int(k)] = int(v)
+
         nickfile = os.path.join(glo_setting["dirname"], "nickname3.csv")
         if not os.path.exists(nickfile):
             asyncio.ensure_future(self.update_nicknames(),
@@ -54,6 +60,7 @@ class Consult:
                         self.nickname_dict[col] = (row[0], row[1])
         Hook.hook('user2roleid', self.user_input)
         Hook.hook('roleid2cnname', self.get_cnname_from_id)
+        Hook.hook('id2dis', self.get_dis_from_id)
 
     async def update_nicknames(self):
         nickfile = os.path.join(self.setting["dirname"], "nickname3.csv")
@@ -108,6 +115,9 @@ class Consult:
             name = self.id2cnname.get(_id, '')
             ret.append(name)
         return ret
+
+    def get_dis_from_id(self, id: int) -> int:
+        return self.id2dis.get(id, 0)
 
     async def jjcsearch_async(self, def_lst, region):
         search_source = self.setting["jjc_search"]

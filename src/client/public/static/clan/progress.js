@@ -21,6 +21,8 @@ var vm = new Vue({
         roles_list_visible: false,
         roles_checked: [],
         roles_include: false,
+        roles_img: {},
+        img_update: 0,
     },
     mounted() {
         var thisvue = this;
@@ -65,15 +67,16 @@ var vm = new Vue({
             return d;
         },
         csummary: function(cha) {
+            var thisvue = this;
             if (cha == undefined) {
                 return '';
             }
-            roles_name = []
+            roles_name = [];
+            roles_id = [];
             for (r of cha.roles) {
                 roles_name.push(r[1]);
             }
-            names = roles_name.join('，');
-            return `(${cha.cycle}-${cha.boss_num}) <a class="digit${cha.damage.toString().length}">${cha.damage}</a><br>${names}`;
+            return `(${cha.cycle}-${cha.boss_num}) <a class="digit${cha.damage.toString().length}">${cha.damage}</a><br>`;
         },
         cdetail: function(cha) {
             if (cha == undefined) {
@@ -143,7 +146,7 @@ var vm = new Vue({
             this.roles_set.clear();
             this.roles_checked = [];
             this.roles_include = false;
-            
+
             challenges.sort((a, b) => a.qqid - b.qqid);
             this.progressData = [...this.members];
             // for (m of this.progressData) m.today_total_damage = 0;
@@ -174,7 +177,19 @@ var vm = new Vue({
                     }
                 }
                 for (role of c.roles) {
-                    thisvue.roles_set.add(role[1]);
+                    if (!thisvue.roles_set.has(role[1])) {
+                        thisvue.roles_set.add(role[1]);
+                        console.log("内存获取图片" + role[0]);
+                        getImg(role[0] + '31', function (b64text, key) {
+                            console.log('key' + key);
+                            if (b64text !== undefined) {
+                                var id = key.slice(0, 4);
+                                console.log("图片写入内存" + id);
+                                thisvue.roles_img[Number(id)] = 'data:image/png;base64,' + b64text;
+                                thisvue.img_update += 1;
+                            }
+                        });
+                    }
                     m.roles_used.add(role[1]);
                 }
             }

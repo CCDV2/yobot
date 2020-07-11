@@ -108,12 +108,18 @@
           <el-table-column label="尾刀" width="150">
             <template v-if="scope.row.detail[0]" slot-scope="scope">
               <a v-html="csummary(scope.row.detail[0])"></a>
+              <a v-for="r in scope.row.detail[0].roles">
+                <img :key="img_update" :src="roles_img[Number(r[0])]" :alt="r[0]" width="32" height="32">
+              </a>
               <el-popover placement="top" effect="light" trigger="hover">[[ cdetail(scope.row.detail[0]) ]]<i class="el-icon-info" slot="reference"></i></el-popover>
             </template>
           </el-table-column>
           <el-table-column label="剩余刀" width="150">
             <template v-if="scope.row.detail[1]" slot-scope="scope">
               <a v-html="csummary(scope.row.detail[1])"></a>
+              <a v-for="r in scope.row.detail[1].roles">
+                <img :key="img_update" :src="roles_img[Number(r[0])]" :alt="r[0]" width="32" height="32">
+              </a>
               <el-popover placement="top" effect="light" trigger="hover">[[ cdetail(scope.row.detail[1]) ]]<i class="el-icon-info" slot="reference"></i></el-popover>
             </template>
           </el-table-column>
@@ -122,12 +128,18 @@
           <el-table-column label="尾刀" width="150">
             <template v-if="scope.row.detail[2]" slot-scope="scope">
               <a v-html="csummary(scope.row.detail[2])"></a>
+              <a v-for="r in scope.row.detail[2].roles">
+                <img :key="img_update" :src="roles_img[Number(r[0])]" :alt="r[0]" width="32" height="32">
+              </a>
               <el-popover placement="top" effect="light" trigger="hover">[[ cdetail(scope.row.detail[2]) ]]<i class="el-icon-info" slot="reference"></i></el-popover>
             </template>
           </el-table-column>
           <el-table-column label="剩余刀" width="150">
             <template v-if="scope.row.detail[3]" slot-scope="scope">
               <a v-html="csummary(scope.row.detail[3])"></a>
+              <a v-for="r in scope.row.detail[3].roles">
+                <img :key="img_update" :src="roles_img[Number(r[0])]" :alt="r[0]" width="32" height="32">
+              </a>
               <el-popover placement="top" effect="light" trigger="hover">[[ cdetail(scope.row.detail[3]) ]]<i class="el-icon-info" slot="reference"></i></el-popover>
             </template>
           </el-table-column>
@@ -136,12 +148,18 @@
           <el-table-column label="尾刀" width="150">
             <template v-if="scope.row.detail[4]" slot-scope="scope">
               <a v-html="csummary(scope.row.detail[4])"></a>
+              <a v-for="r in scope.row.detail[4].roles">
+                <img :key="img_update" :src="roles_img[Number(r[0])]" :alt="r[0]" width="32" height="32">
+              </a>
               <el-popover placement="top" effect="light" trigger="hover">[[ cdetail(scope.row.detail[4]) ]]<i class="el-icon-info" slot="reference"></i></el-popover>
             </template>
           </el-table-column>
           <el-table-column label="剩余刀" width="150">
             <template v-if="scope.row.detail[5]" slot-scope="scope">
               <a v-html="csummary(scope.row.detail[5])"></a>
+              <a v-for="r in scope.row.detail[5].roles">
+                <img :key="img_update" :src="roles_img[Number(r[0])]" :alt="r[0]" width="32" height="32">
+              </a>
               <el-popover placement="top" effect="light" trigger="hover">[[ cdetail(scope.row.detail[5]) ]]<i class="el-icon-info" slot="reference"></i></el-popover>
             </template>
           </el-table-column>

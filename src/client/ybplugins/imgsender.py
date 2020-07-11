@@ -14,7 +14,7 @@ class ImgSender:
                 *args, **kwargs):
         self.setting = glo_setting
         self.img_version = glo_setting.get('img_version', 1)
-        
+
     def register_routes(self, app: Quart):
 
         @app.route(urljoin(
@@ -39,7 +39,6 @@ class ImgSender:
                 img_id = str(img_id)
                 response = []
                 img_path = os.path.join('./public/img_cls', img_id[:4], img_id[4] + '.png')
-                print(img_path)
                 if os.path.exists(img_path):
                     with open(img_path, 'rb') as img:
                         img_str = base64.b64encode(img.read()).decode('ascii')
@@ -53,6 +52,12 @@ class ImgSender:
         @app.route(urljoin(self.setting['public_basepath'], 'img/version'), methods=['GET'])
         async def send_img_version():
             return jsonify(code=0, data=self.img_version)
+
+    def execute(self, *args, **kwargs):
+        pass
+
+    async def execute_async(self, *args, **kwargs):
+        pass
 
 if __name__ == '__main__':
     pass

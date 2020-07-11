@@ -18,20 +18,18 @@ else {
     yobotdb = e.target.result;
   };
   IDBOpenDBRequest.onerror = function(e) {
+    console.log('打开数据库失败');
     console.log(e);
   };
   IDBOpenDBRequest.onupgradeneeded = function(e) {
     yobotdb = e.target.result;
     if (!yobotdb.objectStoreNames.contains('img')) {
       console.log('创建img缓存');
-      var imgStore = db.createObjectStore('img', {
-        keypath: 'id',
-        autoIncrement: false
+      var imgStore = yobotdb.createObjectStore('img', {
+        keyPath: 'id',
       });
     }
-  }).catch(error => {
-    console.log(error);
-  });
+  }
 }
 
 function getImgVersion() {
@@ -44,48 +42,66 @@ function getRootPath() {
   var pos = curWwwPath.indexOf(pathName);
   var localhostPath = curWwwPath.substring(0, pos);
   var projectName = pathName.substring(0, pathName.substr(1).indexOf('/') + 1);
-  return(localhostPath + projectName);
+  return(localhostPath + projectName + '/');
 }
 
-function getImg(key) {
+function getImg(key, callback, retry=true) {
+  console.log(key + ' ' + retry);
   if (!yobotdb) {
 
   }
   else {
-    var transaction = yobotdb.transaction('img', 'readwrite');
+    var transaction = yobotdb.transaction('img');
     var imgStore = transaction.objectStore('img');
-    var request = store.get(key);
+    var request = imgStore.get(Number(key));
     request.onsuccess = function (e) {
-      console.log(e.target.result.img)
-      return;
+      if (e.target.result) {
+        return callback && callback(e.target.result['img'], key);
+      }
+      else if (retry) {
+        return requestImg(key, callback);
+      }
+      else return callback && callback(undefined, key);
     }
     request.onerror = function (e) {
       console.log('获取图片失败' + e);
-      requestImg(key).then(function () {
-        return getImd(key);
-      });
+      if (retry) {
+        return requestImg(key, callback);
+      }
+      else {
+         return callback && callback(undefined, key);
+      }
     }
   }
 }
 
-async function requestImg(key) {
+async function requestImg(key, callback) {
   axios.post(getRootPath() + 'img/' + key).then(response => {
-    if (response.code !== 0) {
-      alert('获取图片更新失败，错误消息\n' + response.data);
+    if (response.data.code !== 0) {
+      console.log('获取图片更新失败，错误代码\n' + response.data.code);
     }
     else
     {
-      var transaction = yobotdb.transaction('img', 'readwrite');
-      var imgStore = transaction.objectStore('img');
-      for (d of response.data) {
-        var request = imgStore.add({id: d['id'], img: d['img']});
-        request.onsuccess = fucntion (e) {
-          console.log('存储图片' + d['id']);
-        };
-        request.onerror = function (e) {
-          console.log('存储图片失败' + e);
-        };
+      if (!yobotdb) {
+        for (d of response.data.data) {
+          return callback && callback(d['img'], key);
+        }
       }
+      else {
+        var transaction = yobotdb.transaction('img', 'readwrite');
+        var imgStore = transaction.objectStore('img');
+        for (d of response.data.data) {
+          var request = imgStore.add({id: Number(d['id']), img: d['img']});
+          request.onsuccess = function (e) {
+            console.log('存储图片' + d['id']);
+            getImg(key, callback, false);
+          };
+          request.onerror = function (e) {
+            console.log('存储图片失败' + e);
+            getImg(key, callback, false);
+          };
+        }
+      }
+    }
   });
-  return;
 }
