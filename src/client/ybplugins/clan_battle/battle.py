@@ -362,6 +362,9 @@ class ClanBattle:
         if (not defeat) and (damage >= group.boss_health):
             raise InputError('伤害超出剩余血量，如击败请使用尾刀')
         if roles:
+            roles = roles.strip()
+            if roles == '':
+                raise InputError('请添加角色或队伍，如：\n报刀123456 。黑骑充电狼\n报刀123456 。黑骑 狼 狗 tp弓 充电宝')
             try:
                 roles_id = self.match_register_team(roles, group_id) or get_role_id(roles)
             except ValueError as e:
@@ -369,6 +372,7 @@ class ClanBattle:
             roles_name = get_name_from_id(roles_id)
             roles_msg = '\n出刀角色：' + ','.join(roles_name)
         else:
+            raise InputError('请添加角色或队伍，如：\n报刀123456 。黑骑充电狼\n报刀123456 。黑骑 狼 狗 tp弓 充电宝')
             roles_id = [None] * 5
             roles_msg = ''
         behalf = None
