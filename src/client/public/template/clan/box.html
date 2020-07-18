@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Box</title>
+    <meta charset="utf-8" />
+    <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/axios/0.19.2/axios.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.13.0/index.js"></script>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.13.0/theme-chalk/index.css">
+    <style>
+      body{
+        text-align:center;
+      }
+      .big{
+        font-size:32px;
+      }
+      .exbig{
+        font-size:48px;
+      }
+      .el-row {
+        margin-bottom: 15px;
+      }
+      el-button{
+        width: 80px;
+      }
+      .unselect_img{
+          opacity: 0.5;
+          margin: 2px;
+      }
+      .select_img{
+        opacity: 1.0;
+        border-style: groove;
+        border: 1px solid red;
+        margin: 1px;
+      }
+    </style>
+</head>
+
+<body>
+  <div id="app">
+    <el-page-header @back="location='../'" style="margin-bottom: 25px" :content="'Box'"></el-page-header>
+    <h1 style="text-align:center">Box统计</h1>
+    <el-switch style="float: left" v-model="edit_enable" active-text="启用编辑" inactive-text="不启用编辑"></el-switch>
+    <el-button type="primary" @click="roles_add_visibility = true">筛选角色</el-button>
+    <el-dialog title="筛选需要统计入box的角色" :visible.sync="roles_add_visibility">
+      <p style="text-align:left">前卫</p>
+        <template :key="roles_add_visibility" v-for="item in roles_front" :key="item.id">
+            <img :key="img_update" :src="item.img" :alt="item.id" width="32" height="32"
+            :class="{'unselect_img':!item.selected,'select_img':item.selected}" @click="click_front(item.id)">
+        </template>
+      <p style="text-align:left">中卫</p>
+        <template :key="roles_add_visibility" v-for="item in roles_mid" :key="item.id">
+          <img :key="img_update" :src="item.img" :alt="item.id" width="32" height="32"
+          :class="{'unselect_img':!item.selected,'select_img':item.selected}" @click="click_mid(item.id)">
+        </template>
+      <p style="text-align:left">后卫</p>
+        <template :key="roles_add_visibility" v-for="item in roles_back" :key="item.id">
+          <img :key="img_update" :src="item.img" :alt="item.id" width="32" height="32"
+          :class="{'unselect_img':!item.selected,'select_img':item.selected}" @click="click_back(item.id)">
+        </template>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="roles_add_visibility = false">取消</el-button>
+        <el-button type="danger" @click="update_roles(), roles_add_visibility = false">确定</el-button>
+      </span>
+    </el-dialog>
+    <el-button type="primary">从excel导入</el-button>
+    <el-button type="primary">导出到excel</el-button>
+    <el-button type="danger" @click="submit_update()">上传至服务器</el-button>
+    <el-table :data="box_data" stripe border :cell-style="{padding: '0px'}" height>
+      <el-table-column prop="qqid" label="QQ号" width="120" sortable fixed></el-table-column>
+      <el-table-column prop="nickname" label="昵称" width="200" sortable fixed></el-table-column>
+      <template v-for="id in roles_show">
+          <el-table-column :label="id" :render-header="render_img" width="80" sortable>
+            <template slot-scope="scope">
+              <span v-if="edit_enable">
+                <el-select v-model="box_data[scope.$index].stars[id]" filterable
+                @change="$forceUpdate()">
+                  <el-option
+                    v-for="item in stars"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                    >
+                  </el-option>
+                </el-select>
+              </span>
+              <span v-else>[[ box_data[scope.$index].stars[id] ]]</span>
+            </template>
+          </el-table-column>
+      </template>
+    </el-table>
+  </div>
+  <footer style="text-align: center">
+    powered by <a href="https://github.com/yuudi/yobot">yobot</a>
+  </footer>
+</body>
+<script>var csrf_token = "{{ session['csrf_token'] }}";</script>
+<script src="{{ url_for('yobot_static', filename='clan/box.js') }}"></script>
+<script src="{{ url_for('yobot_static', filename='imgloader.js')}}"></script>
+
+</html>

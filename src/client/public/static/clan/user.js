@@ -129,6 +129,9 @@ var vm = new Vue({
                 case '5':
                     window.location = `../my/`;
                     break;
+                case '6':
+                    window.location = '../box/';
+                    break;
             }
         },
     },

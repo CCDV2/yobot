@@ -4,7 +4,7 @@ from playhouse.migrate import SqliteMigrator, migrate
 from .web_util import rand_string
 
 _db = SqliteDatabase(None)
-_version = 11  # 目前版本
+_version = 12  # 目前版本
 
 MAX_TRY_TIMES = 3
 
@@ -133,9 +133,10 @@ class Chara_nickname(_BaseModel):
 
 class User_box(_BaseModel):
     qqid = BigIntegerField()
+    gid = BigIntegerField(null=True)
     chid = IntegerField()
-    last_use = IntegerField()
-    rank = IntegerField()
+    last_use = IntegerField(null=True)
+    rank = IntegerField(null=True)
     stars = IntegerField()
     equit = BooleanField()
 
@@ -174,7 +175,6 @@ def init(sqlite_filename):
         DB_schema.create(key='version', value=str(_version))
     else:
         old_version = int(DB_schema.get(key='version').value)
-
     if not User.table_exists():
         Admin_key.create_table()
         User.create_table()
@@ -254,12 +254,20 @@ def db_upgrade(old_version):
         )
     if old_version < 10:
         migrate(
-            migrator.add_column('clan_challenge', 'role1', IntegerField(null=True)),    
-            migrator.add_column('clan_challenge', 'role2', IntegerField(null=True)),    
-            migrator.add_column('clan_challenge', 'role3', IntegerField(null=True)),    
-            migrator.add_column('clan_challenge', 'role4', IntegerField(null=True)),    
-            migrator.add_column('clan_challenge', 'role5', IntegerField(null=True)),    
+            migrator.add_column('clan_challenge', 'role1', IntegerField(null=True)),
+            migrator.add_column('clan_challenge', 'role2', IntegerField(null=True)),
+            migrator.add_column('clan_challenge', 'role3', IntegerField(null=True)),
+            migrator.add_column('clan_challenge', 'role4', IntegerField(null=True)),
+            migrator.add_column('clan_challenge', 'role5', IntegerField(null=True)),
         )
     if old_version < 11:
         Clan_team.create_table()
+    if old_version < 12:
+        migrate(
+            migrator.add_column('user_box', 'gid', BigIntegerField(null=True)),
+            migrator.drop_column('user_box', 'last_use', IntegerField()),
+            migrator.add_column('user_box', 'last_use', IntegerField(null=True)),
+            migrator.drop_column('user_box', 'rank', IntegerField()),
+            migrator.add_column('user_box', 'rank', IntegerField(null=True)),
+        )
     DB_schema.replace(key='version', value=str(_version)).execute()

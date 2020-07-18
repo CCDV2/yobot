@@ -44,7 +44,8 @@ class Consult:
         with open(os.path.join(glo_setting["dirname"], 'stand.json'), 'r') as f:
             d = json.load(f)
         for k, v in d.items():
-            self.id2dis[int(k)] = int(v)
+            if int(v) != 0:
+                self.id2dis[int(k)] = int(v)
 
         nickfile = os.path.join(glo_setting["dirname"], "nickname3.csv")
         if not os.path.exists(nickfile):
@@ -58,9 +59,11 @@ class Consult:
                     self.id2cnname[int(row[0])] = row[2]
                     for col in row:
                         self.nickname_dict[col] = (row[0], row[1])
+            self.remove_extra_roles()
         Hook.hook('user2roleid', self.user_input)
         Hook.hook('roleid2cnname', self.get_cnname_from_id)
         Hook.hook('id2dis', self.get_dis_from_id)
+        Hook.hook('get_id2dis', lambda: self.id2dis)
 
     async def update_nicknames(self):
         nickfile = os.path.join(self.setting["dirname"], "nickname3.csv")
@@ -81,6 +84,17 @@ class Consult:
                 self.id2cnname[int(row[0])] = row[2]
                 for col in row:
                     self.nickname_dict[col] = (row[0], row[1])
+        self.remove_extra_roles()
+
+    def remove_extra_roles(self):
+        extra_set = set()
+        for k in self.id2dis.keys():
+            extra_set.add(k)
+        for k in self.id2cnname.keys():
+            if k in extra_set:
+                extra_set.remove(k)
+        for k in extra_set:
+            self.id2dis.pop(k)
 
     def user_input(self, cmd: str, is_retry=False, len_check=True):
         def_set = set()

@@ -39,6 +39,7 @@
       <el-menu-item index="3">查刀</el-menu-item>
       <el-menu-item index="4">统计</el-menu-item>
       <el-menu-item index="5">我的</el-menu-item>
+      <el-menu-item index="6">box</el-menu-item>
     </el-menu>
     <h1 style="text-align:center">出刀记录</h1>
     <el-date-picker v-model="reportDate" type="date" placeholder="选择日期" @change="report_day"></el-date-picker>
@@ -101,8 +102,8 @@
       <el-table :data="progressData" :span-method="arraySpanMethod" style="width: 1485" ref="multipleTable"
         @selection-change="handleSelectionChange" stripe>
         <el-table-column type="selection" width="55"></el-table-column>
-        <el-table-column prop="qqid" label="QQ号" width="120" sortable></el-table-column>
-        <el-table-column prop="nickname" label="昵称" width="200" sortable></el-table-column>
+        <el-table-column prop="qqid" label="QQ号" width="120" sortable fixed></el-table-column>
+        <el-table-column prop="nickname" label="昵称" width="200" sortable fixed></el-table-column>
         <el-table-column prop="finished" label="已完成" width="100" sortable></el-table-column>
         <el-table-column label="第一刀">
           <el-table-column label="尾刀" width="150">
