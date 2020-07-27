@@ -64,6 +64,7 @@ class Consult:
         Hook.hook('roleid2cnname', self.get_cnname_from_id)
         Hook.hook('id2dis', self.get_dis_from_id)
         Hook.hook('get_id2dis', lambda: self.id2dis)
+        Hook.hook('get_id2cnname', lambda: self.id2cnname)
 
     async def update_nicknames(self):
         nickfile = os.path.join(self.setting["dirname"], "nickname3.csv")

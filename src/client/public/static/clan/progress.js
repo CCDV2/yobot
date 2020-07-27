@@ -23,6 +23,7 @@ var vm = new Vue({
         roles_include: false,
         roles_img: {},
         img_update: 0,
+        text_enable: false,
     },
     mounted() {
         var thisvue = this;
@@ -77,6 +78,17 @@ var vm = new Vue({
                 roles_name.push(r[1]);
             }
             return `(${cha.cycle}-${cha.boss_num}) <a class="digit${cha.damage.toString().length}">${cha.damage}</a><br>`;
+        },
+        roleSummary: function(cha) {
+            var thisvue = this;
+            if (cha == undefined) {
+                return '';
+            }
+            roles_name = [];
+            for (r of cha.roles) {
+                roles_name.push(r[1]);
+            }
+            return roles_name.join('，');
         },
         cdetail: function(cha) {
             if (cha == undefined) {
@@ -240,6 +252,10 @@ var vm = new Vue({
             return qqid;
         },
         viewInExcel: function() {
+            if (!this.text_enable) {
+                this.$alert('excel不会加载图片，请切换到文字显示');
+                return;
+            }
             var icons = document.getElementsByTagName('span');
             while (icons[0]) {
                 icons[0].remove();

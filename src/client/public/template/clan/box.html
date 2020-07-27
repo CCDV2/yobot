@@ -6,6 +6,7 @@
     <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.min.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/axios/0.19.2/axios.min.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.13.0/index.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/xlsx/0.16.4/xlsx.core.min.js"></script>
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.13.0/theme-chalk/index.css">
     <style>
       body{
@@ -63,32 +64,43 @@
         <el-button type="danger" @click="update_roles(), roles_add_visibility = false">确定</el-button>
       </span>
     </el-dialog>
-    <el-button type="primary">从excel导入</el-button>
-    <el-button type="primary">导出到excel</el-button>
     <el-button type="danger" @click="submit_update()">上传至服务器</el-button>
-    <el-table :data="box_data" stripe border :cell-style="{padding: '0px'}" height>
+    <el-table :data="box_data" stripe border :cell-style="{padding: '0px'}">
       <el-table-column prop="qqid" label="QQ号" width="120" sortable fixed></el-table-column>
       <el-table-column prop="nickname" label="昵称" width="200" sortable fixed></el-table-column>
-      <template v-for="id in roles_show">
-          <el-table-column :label="id" :render-header="render_img" width="80" sortable>
-            <template slot-scope="scope">
-              <span v-if="edit_enable">
-                <el-select v-model="box_data[scope.$index].stars[id]" filterable
-                @change="$forceUpdate()">
-                  <el-option
-                    v-for="item in stars"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                    >
-                  </el-option>
-                </el-select>
-              </span>
-              <span v-else>[[ box_data[scope.$index].stars[id] ]]</span>
-            </template>
-          </el-table-column>
-      </template>
+        <template v-for="id in roles_show">
+            <el-table-column :label="id" :render-header="render_header" width="80" :sortable="true"
+            :sort-method="(a, b) => sort_stars(a, b, id)">
+              <template slot-scope="scope">
+                <template v-if="edit_enable">
+                  <el-select v-model="scope.row.stars[id]" filterable
+                  @change="$forceUpdate()">
+                    <el-option
+                      v-for="item in stars"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                      >
+                    </el-option>
+                  </el-select>
+                </template>
+                <template v-else>[[ scope.row.stars[id] ]]</template>
+              </template>
+            </el-table-column>
+        </template>
     </el-table>
+    <br>
+    <el-switch style="float: left" v-model="text_enable" active-text="文字显示" inactive-text="图片显示"></el-switch>
+    <el-upload style="float: right"
+      action="#"
+      :http-request="import_from_excel"
+      :limit="1"
+      accept=".xls">
+      <el-button size="mini" type="primary">从excel导入<i class="el-icon-upload el-icon--right"></i></el-button>
+    </el-upload>
+    <el-button-group>
+      <el-button type="primary" @click="export_to_excel" size="mini">导出到excel<i class="el-icon-download el-icon--right"></i></el-button>
+    </el-button-gruop>
   </div>
   <footer style="text-align: center">
     powered by <a href="https://github.com/yuudi/yobot">yobot</a>
