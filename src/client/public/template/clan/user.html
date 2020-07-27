@@ -44,6 +44,7 @@
     <h1 style="text-align:center">[[ nickname ]]的出刀记录</h1>
     <template v-if="challengeData.length > 0">
       <a class="digit6">十万</a> <a class="digit7">百万</a> <a class="digit8">千万</a> <a class="digit9">亿</a>
+      <el-switch style="float: right" v-model="text_enable" active-text="文字显示" inactive-text="图片显示"></el-switch>
       <el-table :data="challengeData" :span-method="arraySpanMethod" style="width: 1100" stripe>
         <el-table-column prop="pcrdate" label="日期" width="100" sortable></el-table-column>
         <el-table-column prop="finished" label="已完成" width="100" sortable></el-table-column>
@@ -51,12 +52,28 @@
           <el-table-column label="尾刀" width="150">
             <template v-if="scope.row.detail[0]" slot-scope="scope">
               <a v-html="csummary(scope.row.detail[0])"></a>
+              <template v-if="!text_enable">
+                <a v-for="r in scope.row.detail[0].roles">
+                  <img :key="img_update" :src="roles_img[Number(r[0])]" :alt="r[0]" width="32" height="32">
+                </a>
+              </template>
+              <template v-else>
+                <a v-html="roleSummary(scope.row.detail[0])"></a>
+              </template>
               <el-popover placement="top" effect="light" trigger="hover">[[ cdetail(scope.row.detail[0]) ]]<i class="el-icon-info" slot="reference"></i></el-popover>
             </template>
           </el-table-column>
           <el-table-column label="剩余刀" width="150">
             <template v-if="scope.row.detail[1]" slot-scope="scope">
               <a v-html="csummary(scope.row.detail[1])"></a>
+              <template v-if="!text_enable">
+                <a v-for="r in scope.row.detail[1].roles">
+                  <img :key="img_update" :src="roles_img[Number(r[0])]" :alt="r[0]" width="32" height="32">
+                </a>
+              </template>
+              <template v-else>
+                <a v-html="roleSummary(scope.row.detail[1])"></a>
+              </template>
               <el-popover placement="top" effect="light" trigger="hover">[[ cdetail(scope.row.detail[1]) ]]<i class="el-icon-info" slot="reference"></i></el-popover>
             </template>
           </el-table-column>
@@ -65,12 +82,28 @@
           <el-table-column label="尾刀" width="150">
             <template v-if="scope.row.detail[2]" slot-scope="scope">
               <a v-html="csummary(scope.row.detail[2])"></a>
+              <template v-if="!text_enable">
+                <a v-for="r in scope.row.detail[2].roles">
+                  <img :key="img_update" :src="roles_img[Number(r[0])]" :alt="r[0]" width="32" height="32">
+                </a>
+              </template>
+              <template v-else>
+                <a v-html="roleSummary(scope.row.detail[2])"></a>
+              </template>
               <el-popover placement="top" effect="light" trigger="hover">[[ cdetail(scope.row.detail[2]) ]]<i class="el-icon-info" slot="reference"></i></el-popover>
             </template>
           </el-table-column>
           <el-table-column label="剩余刀" width="150">
             <template v-if="scope.row.detail[3]" slot-scope="scope">
               <a v-html="csummary(scope.row.detail[3])"></a>
+              <template v-if="!text_enable">
+                <a v-for="r in scope.row.detail[3].roles">
+                  <img :key="img_update" :src="roles_img[Number(r[0])]" :alt="r[0]" width="32" height="32">
+                </a>
+              </template>
+              <template v-else>
+                <a v-html="roleSummary(scope.row.detail[3])"></a>
+              </template>
               <el-popover placement="top" effect="light" trigger="hover">[[ cdetail(scope.row.detail[3]) ]]<i class="el-icon-info" slot="reference"></i></el-popover>
             </template>
           </el-table-column>
@@ -79,12 +112,28 @@
           <el-table-column label="尾刀" width="150">
             <template v-if="scope.row.detail[4]" slot-scope="scope">
               <a v-html="csummary(scope.row.detail[4])"></a>
+              <template v-if="!text_enable">
+                <a v-for="r in scope.row.detail[4].roles">
+                  <img :key="img_update" :src="roles_img[Number(r[0])]" :alt="r[0]" width="32" height="32">
+                </a>
+              </template>
+              <template v-else>
+                <a v-html="roleSummary(scope.row.detail[4])"></a>
+              </template>
               <el-popover placement="top" effect="light" trigger="hover">[[ cdetail(scope.row.detail[4]) ]]<i class="el-icon-info" slot="reference"></i></el-popover>
             </template>
           </el-table-column>
           <el-table-column label="剩余刀" width="150">
             <template v-if="scope.row.detail[5]" slot-scope="scope">
               <a v-html="csummary(scope.row.detail[5])"></a>
+              <template v-if="!text_enable">
+                <a v-for="r in scope.row.detail[5].roles">
+                  <img :key="img_update" :src="roles_img[Number(r[0])]" :alt="r[0]" width="32" height="32">
+                </a>
+              </template>
+              <template v-else>
+                <a v-html="roleSummary(scope.row.detail[5])"></a>
+              </template>
               <el-popover placement="top" effect="light" trigger="hover">[[ cdetail(scope.row.detail[5]) ]]<i class="el-icon-info" slot="reference"></i></el-popover>
             </template>
           </el-table-column>
@@ -103,5 +152,5 @@
 </body>
 <script>var csrf_token = "{{ session['csrf_token'] }}";</script>
 <script src="{{ url_for('yobot_static', filename='clan/user.js') }}"></script>
-
+<script src="{{ url_for('yobot_static', filename='imgloader.js')}}"></script>
 </html>

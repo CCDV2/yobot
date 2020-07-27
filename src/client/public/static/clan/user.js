@@ -15,6 +15,10 @@ var vm = new Vue({
         activeIndex: '5',
         qqid: 0,
         nickname: '',
+        text_enable: false,
+        img_update: 0,
+        roles_set: new Set(),
+        roles_img: {},
     },
     mounted() {
         var thisvue = this;
@@ -41,7 +45,17 @@ var vm = new Vue({
             if (cha == undefined) {
                 return '';
             }
-            return `(${cha.cycle}-${cha.boss_num}) <a class="digit${cha.damage.toString().length}">${cha.damage}</a>`;
+            return `(${cha.cycle}-${cha.boss_num}) <a class="digit${cha.damage.toString().length}">${cha.damage}</a><br>`;
+        },
+        roleSummary: function (cha) {
+            if (cha == undefined) {
+                return '';
+            }
+            roles_name = [];
+            for (r of cha.roles) {
+                roles_name.push(r[1]);
+            }
+            return roles_name.join('，');
         },
         cdetail: function (cha) {
             if (cha == undefined) {
@@ -97,12 +111,28 @@ var vm = new Vue({
                         m.finished += 0.5;
                     }
                 }
+                for (role of c.roles) {
+                    if (!thisvue.roles_set.has(role[1])) {
+                        thisvue.roles_set.add(role[1]);
+                        getImg(role[0] + '31', function (b64text, key) {
+                            if (b64text !== undefined) {
+                                var id = key.slice(0, 4);
+                                thisvue.roles_img[Number(id)] = 'data:image/png;base64,' + b64text;
+                                thisvue.img_update += 1;
+                            }
+                        });
+                    }
+                }
             }
             if (m.pcrdate != -1) {
                 thisvue.challengeData.push(m);
             }
         },
         viewInExcel: function () {
+            if (!this.text_enable) {
+                this.$alert('excel不会加载图片，请切换到文字显示');
+                return;
+            }
             var icons = document.getElementsByTagName('span');
             while (icons[0]) {
                 icons[0].remove();
